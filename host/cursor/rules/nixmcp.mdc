@@ -1,0 +1,86 @@
+---
+description: NixMCP Rules for NixOS Package and Option Lookups
+globs: **/*.*
+---
+
+## Search Nix Documentation 
+@https://nix.dev/search.html?q={query}
+
+## NixOS Resources
+nixos://status                         # Get NixOS server status information
+nixos://package/{package_name}         # Get information about a specific package
+nixos://search/packages/{query}        # Search for packages matching the query
+nixos://search/options/{query}         # Search for NixOS options matching the query
+nixos://option/{option_name}          # Get information about a specific NixOS option
+nixos://search/programs/{program}      # Search for packages that provide specific programs
+nixos://packages/stats                 # Get statistics about NixOS packages
+
+## Home Manager Resources
+home-manager://status                  # Check Home Manager context status
+home-manager://search/options/{query}  # Search for Home Manager options
+home-manager://option/{option_name}    # Get details about a specific option
+home-manager://options/stats           # Get statistics about options
+home-manager://options/list           # List all option categories
+home-manager://options/{category}      # Get options for specific categories:
+                                      # programs, services, home, accounts, fonts,
+                                      # gtk, qt, xdg, wayland, i18n, manual, news,
+                                      # nix, nixpkgs, systemd, targets, dconf,
+                                      # editorconfig, lib, launchd, pam, sops,
+                                      # windowManager, xresources, xsession
+home-manager://options/prefix/{prefix} # Get options under specific prefix
+
+## nix-darwin Resources
+darwin://status                        # Check nix-darwin context status
+darwin://search/options/{query}        # Search for macOS configuration options
+darwin://option/{option_name}         # Get details about specific option
+darwin://options/stats                # Get statistics about options
+darwin://options/list                 # List all option categories
+darwin://options/{category}           # Get options for specific categories:
+                                     # documentation, environment, fonts, homebrew,
+                                     # launchd, networking, nix, nixpkgs, power,
+                                     # programs, security, services, system,
+                                     # time, users
+darwin://options/prefix/{prefix}      # Get options under specific prefix
+
+## Search Commands
+nixos_search(query="term", type="packages", limit=10, channel="unstable")
+nixos_search(query="term", type="options", channel="stable")
+nixos_search(query="term", type="programs")
+home_manager_search(query="term")
+darwin_search(query="term")
+
+## Info Commands
+nixos_info(name="name", type="package", channel="unstable")
+nixos_info(name="name", type="option", channel="stable")
+home_manager_info(name="option.path")
+darwin_info(name="option.path")
+
+## Stats Commands
+nixos_stats(channel="unstable")
+home_manager_stats()
+darwin_stats()
+
+## List Commands
+home_manager_list_options()
+darwin_list_options()
+
+## Prefix Commands
+home_manager_options_by_prefix(option_prefix="prefix")
+darwin_options_by_prefix(option_prefix="prefix")
+
+## Examples
+# Package lookups
+nixos://package/firefox
+nixos://package/python
+
+# Option lookups
+nixos://option/services.nginx
+nixos://option/programs.git
+
+# Search examples
+nixos_search(query="postgresql", type="packages")
+nixos_search(query="services.nginx", type="options")
+
+# Info examples
+nixos_info(name="firefox", type="package")
+nixos_info(name="services.nginx.enable", type="option") 

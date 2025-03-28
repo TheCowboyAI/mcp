@@ -1,0 +1,21 @@
+---
+description: Model Context Protocol (MCP) Rules for Creating and Debugging MCPs
+globs: **/*.*
+---
+
+## MCP Specification Documents
+https://spec.modelcontextprotocol.io/specification/
+
+## modelcontextprotocol Source Code
+https://github.com/modelcontextprotocol
+
+
+## Rust MCP Server SDK
+https://docs.rs/mcp_rust_sdk/latest/mcp_rust_sdk/
+
+
+## Rust implementation of the Model Context Protocol (MCP)
+https://crates.io/crates/mcp_rs
+
+## OUR Repository
+https://github.com/TheCowboyAI/mcp-rust-sdk

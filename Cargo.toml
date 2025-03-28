@@ -1,0 +1,25 @@
+[package]
+name = "nix-inspector-mcp"
+version = "0.1.0"
+edition = "2021"
+authors = ["Cowboy AI, LLC"]
+description = "A Model Context Protocol server for inspecting Nix systems and flakes"
+license = "MIT"
+
+[dependencies]
+mcp-rust-sdk = "0.1.0"
+tokio = { version = "1.0", features = ["full"] }
+env_logger = "0.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+async-trait = "0.1"
+log = "0.4"
+
+[dev-dependencies]
+tokio-test = "0.4"
+assert_matches = "1.5"
+
+[[bin]]
+name = "nix-inspector-mcp"
+path = "src/main.rs" 

@@ -1,0 +1,263 @@
+---
+description: "Rules for maintaining project memory bank and documentation structure"
+globs: "docs/**/*.md"
+---
+
+# Project Memory Management
+
+## Transition Plan
+- Current: Git-based event log using commits
+- Target: Domain Message Bus integration
+- Commit messages serve as temporary event log
+- Each step requires a commit
+- Commits must be structured for future message conversion
+
+## Event Logging
+- Every memory bank change needs a commit
+- Commit format:
+  ```
+  [Memory Event] <category>: <action>
+  
+  Context: Why this change is happening
+  Changes:
+  - List of specific changes
+  - Each change as a discrete item
+  
+  Related:
+  - Links to issues/PRs
+  - References to other docs
+  ```
+- Categories:
+  - SDLC: Software Development Life Cycle events
+  - DECISION: Technical or architectural decisions
+  - MEMORY: Project memory bank updates
+  - MODE: Mode transitions
+  - NOTE: New or updated notes
+
+## Core Files
+- projectBrief.md: Defines core requirements and project scope
+- projectContext.md: Explains project existence and operation
+- domainContext.md: Tracks current state and decisions
+- systemPatterns.md: Documents technical architecture
+- techContext.md: Documents technical environment
+- progress.md: Tracks project status
+- notes/: Directory for specific notes and decisions
+
+## Notes Structure
+- Store in docs/notes/
+- Categories:
+  - decisions/: Technical and architectural decisions
+  - research/: Research findings and evaluations
+  - meetings/: Meeting notes and outcomes
+  - reviews/: Code and design review notes
+  - explorations/: Technical explorations and experiments
+- File naming: YYYY-MM-DD-brief-title.md
+- Required sections:
+  - Context: Why this note exists
+  - Details: Main content
+  - Decisions: Any decisions made
+  - Next Steps: Follow-up actions
+  - References: Links to related notes/issues
+
+## Memory Bank Updates
+- Update after significant changes
+- Document current state
+- Record mode transitions
+- List next steps
+- Commit changes with event format
+- Link related changes in commit
+
+## Mode Documentation
+- Follow mode workflow
+- Document mode transition
+- List mode-specific tasks
+- Update progress.md
+- Commit mode change as event
+
+## Documentation Hierarchy
+- Follow memory bank hierarchy
+- Reference parent documents
+- Maintain consistency
+- Update related files
+
+rules:
+  - name: "Core Files Existence"
+    pattern: "docs/(projectBrief|projectContext|domainContext|systemPatterns|techContext|progress)\\.md"
+    ensure:
+      - "File exists"
+      - "Contains required sections"
+      - "Updated regularly"
+      - "Follows memory bank hierarchy"
+    message: "Core memory bank files must exist and be maintained"
+    severity: "error"
+
+  - name: "Project Brief Structure"
+    pattern: "docs/projectBrief\\.md"
+    ensure:
+      - "Defines core requirements"
+      - "States project goals"
+      - "Specifies project scope"
+      - "Acts as source of truth"
+    message: "Project Brief must define core project requirements and scope"
+    severity: "error"
+
+  - name: "Project Context Structure"
+    pattern: "docs/projectContext\\.md"
+    ensure:
+      - "Explains project existence"
+      - "Describes problems solved"
+      - "Details operation methods"
+      - "Defines UX goals"
+    message: "Project Context must explain why and how the project works"
+    severity: "error"
+
+  - name: "Domain Context Structure"
+    pattern: "docs/domainContext\\.md"
+    ensure:
+      - "Contains domain specifics"
+      - "Lists current focus"
+      - "Documents recent changes"
+      - "Outlines next steps"
+      - "Records active decisions"
+    message: "Domain Context must track current state and decisions"
+    severity: "error"
+
+  - name: "System Patterns Structure"
+    pattern: "docs/systemPatterns\\.md"
+    ensure:
+      - "Defines system architecture"
+      - "Lists technical decisions"
+      - "Documents design patterns"
+      - "Shows component relationships"
+    message: "System Patterns must document technical architecture and decisions"
+    severity: "error"
+
+  - name: "Tech Context Structure"
+    pattern: "docs/techContext\\.md"
+    ensure:
+      - "Lists technologies used"
+      - "Details dev setup"
+      - "Specifies constraints"
+      - "Documents dependencies"
+    message: "Tech Context must document technical environment and constraints"
+    severity: "error"
+
+  - name: "Progress Structure"
+    pattern: "docs/progress\\.md"
+    ensure:
+      - "Lists working features"
+      - "Tracks remaining work"
+      - "Shows current status"
+      - "Documents current mode"
+      - "Lists known issues"
+    message: "Progress must track project status and remaining work"
+    severity: "error"
+
+  - name: "Memory Bank Updates"
+    pattern: "(domainContext|progress)\\.md"
+    ensure:
+      - "Updated after significant changes"
+      - "Documents current state"
+      - "Records mode transitions"
+      - "Lists next steps"
+    message: "Memory Bank must be updated after significant changes"
+    severity: "warning"
+
+  - name: "Mode Documentation"
+    pattern: "\\b(Plan|Act)\\s+Mode\\b"
+    ensure:
+      - "Follows mode workflow"
+      - "Documents mode transition"
+      - "Lists mode-specific tasks"
+      - "Updates progress.md"
+    message: "Mode changes must be properly documented and followed"
+    severity: "warning"
+
+  - name: "Documentation Hierarchy"
+    pattern: "docs/.*\\.md"
+    ensure:
+      - "Follows memory bank hierarchy"
+      - "References parent documents"
+      - "Maintains consistency"
+      - "Updates related files"
+    message: "Documentation must follow memory bank hierarchy"
+    severity: "warning"
+
+  - name: "Notes Structure"
+    pattern: "docs/notes/.*\\.md"
+    ensure:
+      - "Follows note template"
+      - "Has required sections"
+      - "Links to related content"
+      - "Uses correct date format"
+      - "Categorized properly"
+    message: "Notes must follow structure and linking requirements"
+    severity: "warning"
+
+  - name: "Event Logging"
+    pattern: ".*"
+    ensure:
+      - "Changes committed as events"
+      - "Follows event format"
+      - "Links related changes"
+      - "Categorizes properly"
+    message: "Changes must be logged as events in commits"
+    severity: "error"
+
+suggestions:
+  - when: "starting_project"
+    suggest: |
+      1. Create projectBrief.md first
+      2. Create projectContext.md based on brief
+      3. Create systemPatterns.md for architecture
+      4. Create techContext.md for environment
+      5. Create domainContext.md for current state
+      6. Create progress.md to track status
+      7. Wait for user input before proceeding
+
+  - when: "updating_memory"
+    suggest: |
+      1. Review ALL memory bank files
+      2. Update domainContext.md with changes
+      3. Update progress.md with status
+      4. Update related documentation
+      5. Verify hierarchy consistency
+
+  - when: "changing_modes"
+    suggest: |
+      1. Document current mode completion
+      2. Update progress.md with status
+      3. Document new mode requirements
+      4. Wait for explicit mode change
+      5. Update domainContext.md
+
+  - when: "adding_context"
+    suggest: |
+      1. Create in appropriate doc/ subfolder
+      2. Link to parent documentation
+      3. Follow memory bank hierarchy
+      4. Update related core files
+      5. Document in progress.md
+
+  - when: "adding_note"
+    suggest: |
+      1. Choose appropriate notes category
+      2. Use date-based filename
+      3. Include required sections
+      4. Link to related content
+      5. Update related documentation
+      6. Reference in domainContext.md if needed
+
+  - when: "making_changes"
+    suggest: |
+      1. Identify change category
+      2. Format commit as event
+      3. Include context and changes
+      4. Link related items
+      5. Ensure future convertibility
+
+references:
+  - "Project Memory Structure: docs/project-memory.md"
+  - "Memory Bank Hierarchy: docs/project-memory.md#memory-bank-structure"
+  - "Core Workflows: docs/project-memory.md#core-workflows"
+  - "Documentation Updates: docs/project-memory.md#documentation-updates" 

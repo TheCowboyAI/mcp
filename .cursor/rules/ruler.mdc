@@ -1,0 +1,133 @@
+---
+description: Rules and patterns for creating Cursor rules
+globs: .cursor/rules/*.mdc
+---
+
+USE THESE BEST PRACTICES FOR CREATING CURSOR RULES:
+@web https://dev.to/dpaluy/mastering-cursor-rules-a-developers-guide-to-smart-ai-integration-1k65
+
+rule_name: "Cursor Rule Creation Assistant"
+rules:
+  - name: "Rule Header Format"
+    pattern: "^---\\ndescription:.*\\nglobs:.*\\n---"
+    ensure:
+      - "Starts with ---"
+      - "Contains description field"
+      - "Contains globs field"
+      - "Ends with ---"
+      - "No leading whitespace"
+      - "No quoting of field values, use space separated values"
+    message: "Rule files must start with proper header format"
+    severity: "error"
+
+  - name: "Rule Structure"
+    pattern: "rule_name:.*\\nrules:"
+    ensure:
+      - "Defines rule_name"
+      - "Contains rules section"
+      - "Uses proper YAML format"
+      - "Follows naming conventions"
+    message: "Rules must follow standard structure"
+    severity: "error"
+
+  - name: "Pattern Definition"
+    pattern: "pattern:.*"
+    ensure:
+      - "Uses valid regex syntax"
+      - "Properly escaped"
+      - "Specific enough to match"
+      - "Not overly broad"
+    message: "Patterns must be valid and specific regex"
+    severity: "error"
+
+  - name: "Ensure Blocks"
+    pattern: "ensure:\\s*\\n(\\s*-.*\\n)+"
+    ensure:
+      - "Contains list of requirements"
+      - "Each item is actionable"
+      - "Clear and specific"
+      - "Properly indented"
+    message: "Ensure blocks must list specific requirements"
+    severity: "error"
+
+  - name: "Message Content"
+    pattern: "message:.*"
+    ensure:
+      - "Clear and descriptive"
+      - "Actionable guidance"
+      - "Proper punctuation"
+      - "Professional tone"
+    message: "Messages must provide clear guidance"
+    severity: "error"
+
+  - name: "Severity Levels"
+    pattern: "severity:\\s*(error|warning|info)"
+    ensure:
+      - "Valid severity level"
+      - "Appropriate for rule"
+      - "Consistent usage"
+    message: "Severity must be appropriate and consistent"
+    severity: "error"
+
+  - name: "Suggestions Section"
+    pattern: "suggestions:\\s*\\n(\\s*-.*\\n)+"
+    ensure:
+      - "Provides helpful examples"
+      - "Clear context"
+      - "Actionable steps"
+      - "Proper formatting"
+    message: "Suggestions must be helpful and clear"
+    severity: "warning"
+
+  - name: "References Section"
+    pattern: "references:\\s*\\n(\\s*-.*\\n)+"
+    ensure:
+      - "Links to documentation"
+      - "Relevant resources"
+      - "Valid URLs"
+      - "Proper formatting"
+    message: "References must be valid and relevant"
+    severity: "warning"
+
+suggestions:
+  - when: "creating_new_rule"
+    suggest: |
+      1. Start with required header format:
+         ---
+         description: Clear description of rule purpose
+         globs: space separated paths
+         ---
+      2. Define rule_name
+      3. Create specific rules section
+      4. Add suggestions for common cases
+      5. Include relevant references
+
+  - when: "defining_patterns"
+    suggest: |
+      1. Use specific regex patterns
+      2. Test pattern matches
+      3. Consider edge cases
+      4. Document pattern purpose
+      5. Include examples
+
+  - when: "writing_messages"
+    suggest: |
+      1. Be clear and specific
+      2. Provide actionable guidance
+      3. Use professional tone
+      4. Include fix suggestions
+      5. Reference documentation
+
+  - when: "setting_severity"
+    suggest: |
+      1. error: Must fix to proceed
+      2. warning: Should fix but not blocking
+      3. info: Suggestions for improvement
+      4. Be consistent across rules
+      5. Document severity choices
+
+references:
+  - "Cursor Rules Documentation: https://docs.cursor.com/context/rules-for-ai"
+  - "Cursor Rules Examples: https://cursor101.com/cursor/rules"
+  - "Regex Pattern Guide: https://docs.cursor.com/context/regex-patterns"
+  - "Best Practices: https://cursor101.com/cursor/rules/best-practices" 

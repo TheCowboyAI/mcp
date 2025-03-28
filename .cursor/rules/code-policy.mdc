@@ -1,0 +1,75 @@
+---
+description: "General coding rules for maintaining code quality and consistency"
+globs: "**/*"
+---
+# General Code Policy
+
+## Code Quality
+- Write clean code
+- Follow SOLID principles
+- Keep functions small
+- Use meaningful names
+- Add proper comments
+
+## Naming Conventions
+- Use descriptive names
+- Follow language style
+- Be consistent
+- Avoid abbreviations
+- Use proper casing
+
+## Code Changes
+- Make atomic changes
+- Write clear commits
+- Update documentation
+- Add tests
+- Review changes
+
+## Code Structure
+- Organize logically
+- Keep files focused
+- Use proper hierarchy
+- Maintain modularity
+- Follow patterns
+
+## Best Practices
+- Handle errors
+- Write tests
+- Document code
+- Follow standards
+- Use version control
+
+## Security
+- Validate input
+- Handle secrets
+- Update dependencies
+- Follow guidelines
+- Audit code
+
+## Performance
+- Optimize code
+- Profile bottlenecks
+- Cache effectively
+- Use proper algorithms
+- Monitor resources
+
+## Documentation
+- Write clear docs
+- Keep docs updated
+- Document APIs
+- Add examples
+- Explain complex logic
+
+## Testing
+- Write unit tests
+- Add integration tests
+- Test edge cases
+- Mock dependencies
+- Maintain coverage
+
+## Maintenance
+- Review regularly
+- Update dependencies
+- Fix technical debt
+- Monitor issues
+- CONTINUOUSLY improve code
