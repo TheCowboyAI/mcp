@@ -5,6 +5,16 @@ globs: "docs/**/*.md"
 
 # Project Memory Management
 
+- YOU MUST READ THE ENTIRE PROJECT MEMORY BANK EVERY TIME YOU START.
+- THIS IS NOT OPTIONAL.
+- UPDATE PROJECT_MEMORY WHENEVER CHANGES ARE ACCEPTED.
+
+- YOU WILL USE TOOLS TO HELP YOU.
+
+- USE GIT **THIS IS NOT OPTIONAL**
+- USE ATOMIC COMMITS
+- ASK BEFORE YOU COMMIT
+
 ## Transition Plan
 - Current: Git-based event log using commits
 - Target: Domain Message Bus integration
@@ -14,6 +24,7 @@ globs: "docs/**/*.md"
 
 ## Event Logging
 - Every memory bank change needs a commit
+
 - Commit format:
   ```
   [Memory Event] <category>: <action>

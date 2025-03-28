@@ -15,6 +15,8 @@ globs: "**/*.rs"
 - use nix build
 - use nix run
 - use nix develop
+- YOUR MUST FIX LINTER ERRORS BEFORE YOU COMMIT
+- IGNORING WARNINGS IS PERMITTED PRIOR TO INITIAL RELEASE
 
 ## Project Structure
 - src/main.rs for binary
@@ -27,6 +29,9 @@ globs: "**/*.rs"
 - rust-toolchain.toml required
 - Cargo.toml required
 - Cargo.lock committed
+- Use the oxalica overlay for packages
+- Use buildRustPackage for dependencies
+- DO NOT USE naersk
 - .gitignore for Rust
 
 ## Code Quality
