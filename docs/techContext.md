@@ -123,6 +123,41 @@ The public API is exposed through `src/lib.rs`:
 
 ## MCP Server Implementation Patterns
 
+### Initialization Pattern
+The server follows a robust initialization pattern:
+
+1. State Management
+   ```rust
+   lazy_static! {
+       static ref INITIALIZED: AtomicBool = AtomicBool::new(false);
+   }
+   ```
+
+2. Protocol Implementation
+   ```rust
+   async fn initialize(
+       &self,
+       implementation: Implementation,
+       capabilities: ClientCapabilities,
+   ) -> Result<ServerCapabilities, McpError>
+   ```
+
+3. Method Handling
+   ```rust
+   async fn handle_method(
+       &self,
+       method: &str,
+       params: Option<Value>,
+   ) -> Result<Value, McpError>
+   ```
+
+Key features:
+- Thread-safe state management
+- Protocol-compliant initialization
+- Clear error handling
+- State validation
+- Capability negotiation
+
 ### Transport Layer Support
 The server implementation supports multiple transport layers:
 1. WebSocket (primary for development/testing)
