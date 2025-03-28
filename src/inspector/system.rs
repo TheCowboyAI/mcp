@@ -1,10 +1,14 @@
 use async_trait::async_trait;
-use mcp_rust_sdk::prelude::*;
+use mcp_rust_sdk::{
+    error::{Error as McpError, ErrorCode},
+    server::ServerHandler,
+    types::{ClientCapabilities, Implementation, ServerCapabilities},
+};
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 use thiserror::Error;
-use std::path::PathBuf;
 use std::collections::HashMap;
+use which;
 
 #[derive(Error, Debug)]
 pub enum SystemAnalyzerError {
@@ -14,15 +18,23 @@ pub enum SystemAnalyzerError {
     ParseError(String),
     #[error("Failed to generate graph: {0}")]
     GraphError(String),
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("UTF-8 error: {0}")]
+    Utf8(#[from] std::string::FromUtf8Error),
+    #[error("JSON error: {0}")]
+    Json(#[from] serde_json::Error),
+    #[error("Which error: {0}")]
+    Which(#[from] which::Error),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct SystemInfo {
-    nixos_version: String,
-    system_flake: Option<String>,
-    current_system: String,
-    nix_version: String,
-    store_path: String,
+    pub nix_version: String,
+    pub nix_cmd: String,
+    pub system_flake: Option<String>,
+    pub current_system: Option<String>,
+    pub store_path: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -41,41 +53,59 @@ pub struct FlakeGraph {
     edges: Vec<(String, String)>,
 }
 
+#[derive(Debug, Serialize)]
+pub struct DependencyGraph {
+    nodes: Vec<String>,
+    edges: Vec<(String, String)>,
+}
+
+impl From<SystemAnalyzerError> for McpError {
+    fn from(err: SystemAnalyzerError) -> Self {
+        McpError::protocol(ErrorCode::InternalError, err.to_string())
+    }
+}
+
 pub struct SystemAnalyzer {
-    nix_cmd: String,
+    info: SystemInfo,
 }
 
 impl SystemAnalyzer {
-    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new() -> Result<Self, SystemAnalyzerError> {
+        let nix_cmd = which::which("nix")
+            .map_err(SystemAnalyzerError::Which)?
+            .to_string_lossy()
+            .to_string();
+
+        let version_output = Command::new(&nix_cmd)
+            .arg("--version")
+            .output()?;
+
+        let nix_version = String::from_utf8(version_output.stdout)?;
+
         Ok(Self {
-            nix_cmd: which::which("nix")?.to_string_lossy().to_string(),
+            info: SystemInfo {
+                nix_version,
+                nix_cmd,
+                system_flake: None,
+                current_system: None,
+                store_path: None,
+            },
         })
     }
 
     /// Get information about the running NixOS system
     pub async fn get_system_info(&self) -> Result<SystemInfo, SystemAnalyzerError> {
-        // Get NixOS version
-        let nixos_version = self.run_nix_command(&["eval", "nixosVersion"])?;
-        
+        let mut info = self.info.clone();
+
         // Get current system
         let current_system = self.run_nix_command(&["eval", "--raw", "system"])?;
-        
-        // Get Nix version
-        let nix_version = self.run_nix_command(&["--version"])?;
-        
+        info.current_system = Some(current_system);
+
         // Get store path
         let store_path = self.run_nix_command(&["eval", "--raw", "storeDir"])?;
+        info.store_path = Some(store_path);
 
-        // Try to get system flake if available
-        let system_flake = self.get_system_flake().ok();
-
-        Ok(SystemInfo {
-            nixos_version,
-            system_flake,
-            current_system,
-            nix_version,
-            store_path,
-        })
+        Ok(info)
     }
 
     /// Analyze a development flake in the current directory
@@ -147,7 +177,7 @@ impl SystemAnalyzer {
 
     // Helper methods
     fn run_nix_command(&self, args: &[&str]) -> Result<String, SystemAnalyzerError> {
-        let output = Command::new(&self.nix_cmd)
+        let output = Command::new(&self.info.nix_cmd)
             .args(args)
             .output()
             .map_err(|e| SystemAnalyzerError::NixCommandError(e.to_string()))?;
@@ -173,7 +203,7 @@ impl SystemAnalyzer {
         // Extract devShell outputs
         let mut dev_shells = Vec::new();
         if let Some(obj) = shell_data.as_object() {
-            for (key, value) in obj {
+            for (key, _value) in obj {
                 if key.starts_with("devShell.") {
                     dev_shells.push(key.clone());
                 }
@@ -232,33 +262,61 @@ impl SystemAnalyzer {
 
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     }
+
+    async fn get_dependency_graph(&self) -> Result<DependencyGraph, McpError> {
+        // Implement dependency graph generation
+        Ok(DependencyGraph {
+            nodes: vec![],
+            edges: vec![],
+        })
+    }
 }
 
 #[async_trait]
-impl ResourceProvider for SystemAnalyzer {
-    async fn handle_request(&self, request: &Request) -> Result<Response, Error> {
-        match request.method.as_str() {
+impl ServerHandler for SystemAnalyzer {
+    async fn initialize(
+        &self,
+        _implementation: Implementation,
+        _capabilities: ClientCapabilities,
+    ) -> Result<ServerCapabilities, McpError> {
+        Ok(ServerCapabilities::default())
+    }
+
+    async fn shutdown(&self) -> Result<(), McpError> {
+        Ok(())
+    }
+
+    async fn handle_method(
+        &self,
+        method: &str,
+        _params: Option<serde_json::Value>,
+    ) -> Result<serde_json::Value, McpError> {
+        match method {
             "get_system_info" => {
                 let info = self.get_system_info().await?;
-                Ok(Response::new(serde_json::to_value(info)?))
+                Ok(serde_json::to_value(info)?)
             }
             "analyze_dev_flake" => {
                 let info = self.analyze_dev_flake().await?;
-                Ok(Response::new(serde_json::to_value(info)?))
+                Ok(serde_json::to_value(info)?)
             }
             "generate_flake_graph" => {
-                let params: Option<HashMap<String, String>> = request.params.clone()
+                let params: Option<HashMap<String, String>> = _params
                     .map(|v| serde_json::from_value(v))
                     .transpose()?;
                 
-                let output_format = params
-                    .and_then(|p| p.get("format"))
-                    .map(String::as_str);
+                let format_str = params
+                    .and_then(|p| p.get("format").map(ToOwned::to_owned));
+                let output_format = format_str.as_deref();
 
                 let graph = self.generate_flake_graph(output_format).await?;
-                Ok(Response::new(serde_json::to_value(graph)?))
+                Ok(serde_json::to_value(graph)?)
             }
-            _ => Err(Error::MethodNotFound),
+            "get_dependency_graph" => {
+                let graph = self.get_dependency_graph().await?;
+                Ok(serde_json::to_value(graph)?)
+            }
+            _ => Err(McpError::protocol(ErrorCode::MethodNotFound, format!("Method {} not found", method))),
         }
     }
 } 
