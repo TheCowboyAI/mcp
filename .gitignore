@@ -1,0 +1,19 @@
+# Rust build artifacts
+/target
+**/*.rs.bk
+Cargo.lock
+
+# Nix
+result
+.direnv
+.envrc.local
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# System files
+.DS_Store
+Thumbs.db 
