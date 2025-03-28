@@ -61,4 +61,54 @@
 3. Integration Pattern
    - Rule-based integration
    - Event-driven updates
-   - Stateless operation 
+   - Stateless operation
+
+## Implementation Patterns
+
+### Rust Project Architecture
+The project follows these key architectural patterns:
+
+1. Builder Pattern
+   - Used in `ServerBuilder` for flexible server configuration
+   - Provides fluent API for server setup
+   - Ensures valid server state before construction
+
+2. Module Organization
+   - Core functionality in dedicated modules
+   - Clear separation between public and internal APIs
+   - Hierarchical module structure for system inspection
+
+3. Error Handling
+   - Custom error types for domain-specific errors
+   - Error propagation using `Result` types
+   - Comprehensive error context through logging
+
+4. Testing Patterns
+   - Integration tests for end-to-end validation
+   - Benchmark-driven performance optimization
+   - Example-based documentation
+   - Property-based testing for complex scenarios
+
+5. API Design
+   - Public API through lib.rs
+   - Clear type re-exports
+   - Minimal public interface
+   - Strong type safety
+
+### MCP Server Patterns
+
+1. Resource Providers
+   - Modular provider implementation
+   - Extensible provider registration
+   - Resource lifecycle management
+
+2. System Analysis
+   - Structured data collection
+   - Cached system information
+   - Efficient resource monitoring
+
+3. Protocol Implementation
+   - Standard MCP message formats
+   - Asynchronous communication
+   - Connection management
+   - Resource cleanup 

@@ -52,3 +52,50 @@
    - Secure resource access
    - Controlled permissions
    - Validated inputs 
+
+## Project Structure
+
+### Rust Components
+The project follows standard Rust project structure:
+
+- `src/main.rs`: Entry point with MCP server setup
+- `src/lib.rs`: Public API exports and re-exports
+- `src/inspector/`: Core system inspection functionality
+  - `mod.rs`: Module definition
+  - `system.rs`: System analysis implementation
+- `tests/`: Integration tests
+  - `integration_test.rs`: Server setup and functionality tests
+- `benches/`: Performance benchmarks
+  - `system_analyzer.rs`: SystemAnalyzer performance tests
+- `examples/`: Usage examples
+  - `basic_server.rs`: Basic MCP server setup
+
+### Testing Strategy
+The project employs a comprehensive testing approach:
+
+1. Integration Tests
+   - Server setup validation
+   - System analysis verification
+   - MCP protocol compliance
+
+2. Benchmarking
+   - SystemAnalyzer performance
+   - Server initialization speed
+   - Resource usage monitoring
+
+3. Example-driven Development
+   - Basic server setup examples
+   - System analysis usage patterns
+   - Error handling demonstrations
+
+### API Design
+The public API is exposed through `src/lib.rs`:
+
+1. Core Components
+   - `SystemAnalyzer`: System inspection capabilities
+   - `Server`: MCP server implementation
+   - `ServerBuilder`: Fluent API for server configuration
+
+2. Re-exports
+   - Common MCP types from `mcp_rust_sdk`
+   - Public inspector module functionality 
