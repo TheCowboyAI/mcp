@@ -2,7 +2,10 @@
   default = pkgs.mkShell {
     nativeBuildInputs = with pkgs; [
       # Rust toolchain from oxalica overlay
-      rust-bin.stable."1.85.1".default
+      (rust-bin.stable."1.85.1".default.override {
+        extensions = ["rust-src"];
+        targets = ["x86_64-unknown-linux-gnu"];
+      })
 
       # Build dependencies
       pkg-config
@@ -11,9 +14,6 @@
       # Development tools
       rustfmt
       clippy
-
-      # Required for building documentation
-      rust-docs
 
       # Direnv integration
       direnv

@@ -31,17 +31,28 @@
 
     # Import our modular components
     packages = import ./modules/lists/packages.nix;
+    shells = import ./modules/shells/default.nix;
+
+    # Helper to create overlayed pkgs
+    pkgsForSystem = system:
+      import nixpkgs {
+        inherit system;
+        overlays = [
+          rust-overlay.overlays.default
+        ];
+      };
   in {
+    # Development shells for each system
+    devShells = forAllSystems (system: let
+      pkgs = pkgsForSystem system;
+    in
+      shells {inherit pkgs;});
+
     # Binary packages for each supported system
-    packages = forAllSystems (
-      system: let
-        overlays = [(import rust-overlay)];
-        pkgs = import nixpkgs {
-          inherit system overlays;
-        };
-      in
-        packages {inherit pkgs;}
-    );
+    packages = forAllSystems (system: let
+      pkgs = pkgsForSystem system;
+    in
+      packages {inherit pkgs;});
 
     # Apps provide a way to run the package
     apps = forAllSystems (system: {
