@@ -1,70 +1,74 @@
 {
-  description = "A Model Context Protocol server for inspecting Nix systems and flakes";
+  description = "";
 
-  # Input sources for this flake
   inputs = {
-    # Pinned to 24.11 for stability
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
-
-    # Rust overlay for better Rust toolchain management
-    rust-overlay = {
-      url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
   outputs = {
     self,
     nixpkgs,
+    flake-utils,
     rust-overlay,
+    ...
   }: let
-    # Systems supported by this flake
-    systems = [
-      "x86_64-linux"
-      "aarch64-linux"
-      "x86_64-darwin"
-      "aarch64-darwin"
-    ];
-
-    # Helper function to create system-specific attributes
-    forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
-
-    # Import our modular components
-    packages = import ./modules/lists/packages.nix;
-    shells = import ./modules/shells/default.nix;
-
-    # Helper to create overlayed pkgs
-    pkgsForSystem = system:
-      import nixpkgs {
-        inherit system;
-        overlays = [
-          rust-overlay.overlays.default
-        ];
-      };
+    system = "x86_64-linux";
+    pkgs = import nixpkgs {
+      inherit system;
+      overlays = [(import rust-overlay)];
+    };
+    rustVersion = pkgs.rust-bin.stable."1.85.1".default;
+    src = ./.;
+    pkg = nixpkgs.lib.importTOML ./Cargo.toml;
+    pkgName = pkg.package.name;
+    env = import ./modules/sets/env.nix {inherit pkgs buildInputs;};
+    buildInputs = import ./modules/lists/buildInputs.nix {inherit pkgs;};
+    shellpackages = import ./modules/lists/packages.nix {inherit pkgs;};
+    devshell = import ./modules/devshell.nix {
+      inherit pkgs buildInputs env;
+      packages = shellpackages;
+    };
+    configurationModule = import ./modules/configuration.nix {
+      inherit pkgs buildInputs;
+      packages = shellpackages;
+    };
+    buildPkg = import ./modules/buildPackage.nix {
+      inherit
+        pkgs
+        pkg
+        buildInputs
+        src
+        env
+        rustVersion
+        ;
+    };
   in {
-    # Development shells for each system
-    devShells = forAllSystems (system: let
-      pkgs = pkgsForSystem system;
-    in
-      shells {inherit pkgs;});
+    packages.${system} = {
+      ${pkgName} = buildPkg;
+      default = self.packages.${system}.${pkgName};
+    };
 
-    # Binary packages for each supported system
-    packages = forAllSystems (system: let
-      pkgs = pkgsForSystem system;
-    in
-      packages {inherit pkgs;});
-
-    # Apps provide a way to run the package
-    apps = forAllSystems (system: {
-      default = {
-        type = "app";
-        program = "${self.packages.${system}.default}/bin/nix-inspector-mcp";
+    apps.${system} = {
+      ${pkgName} = flake-utils.lib.mkApp {
+        drv = self.packages.${system}.${pkgName};
       };
-    });
+      default = self.apps.${system}.${pkgName};
+    };
 
-    # Overlay for adding our packages to nixpkgs
-    overlays.default = final: prev: {
-      nix-inspector-mcp = self.packages.${prev.system}.default;
+    devShells.${system}.default = devshell;
+
+    nixosConfigurations."${pkgName}c" = nixpkgs.lib.nixosSystem {
+      inherit system;
+      modules = [
+        configurationModule
+        users
+        {
+          environment.systemPackages = [self.packages.${system}.${pkgName}];
+          nixpkgs.overlays = [(import rust-overlay)];
+        }
+      ];
     };
   };
 }

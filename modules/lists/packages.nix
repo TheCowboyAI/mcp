@@ -1,47 +1,57 @@
-# Package definitions for nix-inspector-mcp
-{pkgs, ...}: {
-  default = pkgs.rustPlatform.buildRustPackage {
-    pname = "nix-inspector-mcp";
-    version = "0.1.0";
-    src = ../../.;
+{ pkgs, ... }:
+with pkgs;
+[
+  just
+  nix
+  bash
+  zsh
+  starship
+  helix
+  xdg-utils
+  socat
 
-    cargoLock = {
-      lockFile = ../../Cargo.lock;
-      outputHashes = {
-        # Add dependency hashes here if needed
-      };
-    };
+  # Nix
+  nix-index
+  nixpkgs-fmt
+  nixd
+  alejandra
+  direnv
 
-    nativeBuildInputs = with pkgs; [
-      pkg-config
-      rustPlatform.cargoSetupHook
-    ];
+  # debugger is a MODULE, don't add that here.
+  # it adds about 10 minutes to the build.
 
-    buildInputs = with pkgs; [
-      openssl
-      nix
-      graphviz
-    ];
+  # Rust
+  rust-bin.stable.latest.default
+  bacon
+  openssl.dev
+  openssl.out
+  openssl
+  gnupg
 
-    # Add runtime dependencies
-    propagatedBuildInputs = with pkgs; [
-      nix
-      graphviz
-    ];
+  # cargo
+  cargo
+  cargo-edit
+  cargo-expand
+  cargo-udeps
+  cargo-whatfeatures
+  cargo-generate
+  cargo-make
+  cargo-edit
 
-    # Set environment variables for build
-    NIX_BIN_PATH = "${pkgs.nix}/bin/nix";
+  # wasm
+  wasmtime
+  wasmserve
+  wasm-tools
+  wasm-pack
+  alsa-lib
+  mesa
+  libdrm
 
-    meta = with pkgs.lib; {
-      description = "A Model Context Protocol server for inspecting Nix systems and flakes";
-      homepage = "https://github.com/thecowboyai/mcp";
-      license = licenses.mit;
-      maintainers = with maintainers; [
-        /*
-        TODO: Add maintainers
-        */
-      ];
-      platforms = platforms.all;
-    };
-  };
-}
+  wayland
+  wl-clipboard
+  spice-vdagent
+  wayland-proxy-virtwl
+  waypipe
+  sway
+  kitty
+]
