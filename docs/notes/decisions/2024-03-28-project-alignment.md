@@ -1,20 +1,21 @@
 # Project Rules Alignment Decision
 
 ## Context
-After reviewing all project rules (@code-policy.mdc, @mcp.mdc, @nix-flakes.mdc, @nixmcp.mdc, @nixos.mdc, @rust.mdc, @project-memory.mdc), we need to align our project structure and implementation with these requirements.
+After reviewing all project rules (@code-policy.mdc, @mcp.mdc, @nix-flakes.mdc, @nixmcp.mdc, @nixos.mdc, @rust.mdc, @project-memory.mdc), we need to align our project structure and implementation with these requirements while maintaining our existing project memory structure.
 
 ## Details
 Current misalignments and required changes:
 
-1. Project Memory Structure
-   - Missing core files:
+1. Project Memory Structure (✓ Core files exist)
+   - Need to maintain and update:
      - projectBrief.md
      - projectContext.md
      - domainContext.md
      - systemPatterns.md
      - techContext.md
-   - Have progress.md but needs review
-   - Need proper notes structure in docs/notes/
+     - progress.md
+   - Need to ensure all changes follow memory event logging
+   - Need to maintain proper notes structure in docs/notes/
 
 2. Rust Implementation
    - Currently using naersk (forbidden)
@@ -42,23 +43,28 @@ Current misalignments and required changes:
    - Need proper error handling/logging
 
 ## Decisions
-1. Create all missing core memory files first
+1. Keep existing memory structure while making technical changes
 2. Switch build system from naersk to buildRustPackage
 3. Implement proper Rust project structure
 4. Update Nix configuration to match requirements
 5. Implement required architectural patterns
+6. Document all changes in memory files
 
 ## Next Steps
-- [ ] Create core memory files
+- [ ] Review and update existing memory files for new changes
 - [ ] Switch to buildRustPackage with oxalica overlay
 - [ ] Create rust-toolchain.toml
 - [ ] Set up proper Rust project structure
 - [ ] Implement testing framework
 - [ ] Update Nix configuration
 - [ ] Document MCP integration
+- [ ] Update domainContext.md with architectural decisions
+- [ ] Update systemPatterns.md with new patterns
+- [ ] Update techContext.md with tooling changes
 
 ## References
-- All project .mdc files
+- Existing project memory files
+- All project .mdc rules
 - MCP specification
 - Rust documentation
 - NixOS documentation 
