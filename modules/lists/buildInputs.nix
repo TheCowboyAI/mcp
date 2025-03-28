@@ -1,7 +1,12 @@
-{pkgs}:
+{
+  pkgs,
+  toolchain,
+  ...
+}:
 with pkgs; [
   # Essential build dependencies
   pkg-config
+  toolchain
 
   # Font rendering
   fontconfig

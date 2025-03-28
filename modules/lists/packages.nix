@@ -1,6 +1,6 @@
 {
   pkgs,
-  rustVersion ? pkgs.rust-bin.stable."1.85.1".default,
+  toolchain,
   ...
 }:
 with pkgs; [
@@ -21,21 +21,18 @@ with pkgs; [
   # debugger is a MODULE, don't add that here.
   # it adds about 10 minutes to the build.
 
-  # Rust
-  rustVersion
+  # Rust development tools
   bacon
   openssl.dev
   openssl.out
   openssl
   gnupg
 
-  # cargo
-  cargo
+  # Additional Rust tools
   cargo-edit
   cargo-expand
   cargo-udeps
   cargo-whatfeatures
   cargo-generate
   cargo-make
-  cargo-edit
 ]

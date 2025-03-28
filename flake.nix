@@ -15,20 +15,24 @@
     ...
   }: let
     system = "x86_64-linux";
+    overlays = [(import rust-overlay)];
     pkgs = import nixpkgs {
-      inherit system;
-      overlays = [(import rust-overlay)];
+      inherit system overlays;
     };
-    rustVersion = pkgs.rust-bin.stable."1.85.1".default;
+    toolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
     src = ./.;
     pkg = nixpkgs.lib.importTOML ./Cargo.toml;
     pkgName = pkg.package.name;
+    buildInputs = import ./modules/lists/buildInputs.nix {
+      inherit pkgs toolchain;
+    };
     env = import ./modules/sets/env.nix {inherit pkgs buildInputs;};
-    buildInputs = import ./modules/lists/buildInputs.nix {inherit pkgs;};
-    shellpackages = import ./modules/lists/packages.nix {inherit pkgs;};
+    shellpackages = import ./modules/lists/packages.nix {
+      inherit pkgs toolchain;
+    };
     devshell = import ./modules/shells/devshell.nix {
       inherit pkgs buildInputs env;
-      packages = shellpackages;
+      packages = shellpackages ++ toolchain.packages;
     };
     configurationModule = import ./modules/configuration.nix {
       inherit pkgs buildInputs;
@@ -41,7 +45,7 @@
         buildInputs
         src
         env
-        rustVersion
+        toolchain
         ;
     };
   in {
