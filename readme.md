@@ -15,6 +15,29 @@ MCP is a structured approach that allows AI systems to communicate effectively w
 - **MCP servers**: Lightweight programs exposing specific capabilities through the standardized protocol
 - **Local/Remote resources**: Your computer's resources or internet-accessible resources that MCP servers can access[8]
 
+### USAGE ###
+
+In Composer,
+
+```bash
+"start a new server project"
+```
+
+Ask any questions about design and architecture. Add Notes and compile them into knowledge graphs and workflows.
+
+Scrape web pages and research information, then compile your project.
+
+### Development Workflow
+
+This project follows a feature branch workflow:
+
+- Developers work on personal branches named after themselves during active development sessions
+- Changes are merged back to `main` when development is complete
+- Pull requests are required for merging changes after official releases
+- The `main` branch represents the stable, production-ready state of the project
+
+For more details, see [Git Branching Strategy](docs/notes/decisions/2024-03-28-git-branching-strategy.md).
+
 ## Available MCP Server Implementations for NixOS
 
 ### NixMCP
@@ -168,3 +191,9 @@ Citations:
 [24] https://flakehub.com/flake/lessuselesss/nix-mcp-servers
 [25] https://github.com/mkaito/nixos-modded-minecraft-servers/blob/master/flake.nix
 [26] https://mikelev.in/futureproof/python-mcp-server-example/
+
+[25] https://github.com/mkaito/nixos-modded-minecraft-servers/blob/master/flake.nix
+[26] https://mikelev.in/futureproof/python-mcp-server-example/
+
+
+
