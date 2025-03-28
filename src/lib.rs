@@ -1,12 +1,15 @@
 pub mod inspector;
 pub mod transport;
 
+// Re-export StdioTransport for public use
+pub use transport::stdio::StdioTransport;
+
 pub use inspector::*;
 pub use transport::*;
 
 use std::sync::Arc;
-use mcp_rust_sdk::server::{Server as McpServer, ServerHandler};
-use mcp_rust_sdk::transport::Transport as McpTransport;
+use mcp_rust_sdk::server::Server as McpServer;
+use mcp_rust_sdk::server::ServerHandler;
 
 /// A builder for creating MCP servers with custom configurations
 pub struct ServerBuilder {
@@ -72,7 +75,7 @@ impl Server {
 
     /// Returns the version of the server
     pub fn version(&self) -> &str {
-        "0.1.0"
+        "0.2.0"
     }
 
     /// Starts the server and runs until completion

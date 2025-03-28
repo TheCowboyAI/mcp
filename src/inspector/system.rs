@@ -9,6 +9,29 @@ use std::process::Command;
 use thiserror::Error;
 use std::collections::HashMap;
 use which;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::path::PathBuf;
+use lazy_static::lazy_static;
+use std::sync::RwLock;
+use std::sync::Arc;
+use uuid;
+use crate::transport::stdio::StdioTransport;
+use serde_json::{json, Value};
+
+lazy_static! {
+    static ref SERVER_STATE: RwLock<ServerState> = RwLock::new(ServerState {
+        initialized: false,
+        implementation: None,
+        capabilities: None,
+    });
+}
+
+#[derive(Debug, Clone)]
+struct ServerState {
+    initialized: bool,
+    implementation: Option<Implementation>,
+    capabilities: Option<ClientCapabilities>,
+}
 
 #[derive(Error, Debug)]
 pub enum SystemAnalyzerError {
@@ -98,6 +121,10 @@ impl SystemAnalyzer {
                 store_path: None,
             },
         })
+    }
+
+    fn is_initialized(&self) -> bool {
+        StdioTransport::is_initialized()
     }
 
     /// Get information about the running NixOS system
@@ -279,6 +306,13 @@ impl SystemAnalyzer {
     }
 }
 
+#[derive(Debug, Deserialize)]
+struct InitializeParams {
+    #[serde(default)]
+    capabilities: Value,
+    implementation: Option<Implementation>,
+}
+
 #[async_trait]
 impl ServerHandler for SystemAnalyzer {
     async fn initialize(
@@ -286,7 +320,13 @@ impl ServerHandler for SystemAnalyzer {
         _implementation: Implementation,
         _capabilities: ClientCapabilities,
     ) -> Result<ServerCapabilities, McpError> {
-        Ok(ServerCapabilities::default())
+        let mut custom = HashMap::new();
+        custom.insert("supports_nix_flakes".to_string(), json!(true));
+        custom.insert("supports_nix_packages".to_string(), json!(true));
+        
+        Ok(ServerCapabilities {
+            custom: Some(custom)
+        })
     }
 
     async fn shutdown(&self) -> Result<(), McpError> {
@@ -296,8 +336,12 @@ impl ServerHandler for SystemAnalyzer {
     async fn handle_method(
         &self,
         method: &str,
-        _params: Option<serde_json::Value>,
-    ) -> Result<serde_json::Value, McpError> {
+        params: Option<Value>,
+    ) -> Result<Value, McpError> {
+        if !self.is_initialized() && method != "initialize" {
+            return Err(McpError::protocol(ErrorCode::ServerNotInitialized, "Server not initialized".to_string()));
+        }
+
         match method {
             "get_system_info" => {
                 let info = self.get_system_info().await?;
@@ -308,7 +352,7 @@ impl ServerHandler for SystemAnalyzer {
                 Ok(serde_json::to_value(info)?)
             }
             "generate_flake_graph" => {
-                let params: Option<HashMap<String, String>> = _params
+                let params: Option<HashMap<String, String>> = params
                     .map(|v| serde_json::from_value(v))
                     .transpose()?;
                 

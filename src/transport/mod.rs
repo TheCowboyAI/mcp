@@ -4,8 +4,7 @@ use mcp_rust_sdk::error::Error as McpError;
 use mcp_rust_sdk::transport::Message;
 use std::pin::Pin;
 
-mod stdio;
-pub use stdio::StdioTransport;
+pub mod stdio;
 
 /// Transport trait that defines the interface for MCP message transport
 #[async_trait]

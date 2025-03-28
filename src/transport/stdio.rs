@@ -1,14 +1,20 @@
 use async_trait::async_trait;
 use futures::{Stream, stream};
-use log::error;
+use log::{error, debug};
 use mcp_rust_sdk::error::{Error as McpError, ErrorCode};
 use mcp_rust_sdk::transport::{Message, Transport as McpTransport};
-use mcp_rust_sdk::{Request, protocol::RequestId};
+use mcp_rust_sdk::{Request, Response, Notification, protocol::RequestId};
 use serde_json::Value;
 use std::io::{self, BufRead, Write};
 use std::pin::Pin;
 use tokio::sync::broadcast;
 use thiserror::Error;
+use std::sync::atomic::{AtomicBool, Ordering};
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref INITIALIZED: AtomicBool = AtomicBool::new(false);
+}
 
 /// Error types that can occur during stdio transport operations
 #[derive(Error, Debug)]
@@ -19,6 +25,9 @@ pub enum StdioError {
     /// Represents an error that occurred while broadcasting a message
     #[error("Failed to broadcast message: {0}")]
     Broadcast(#[from] broadcast::error::SendError<Message>),
+    /// Represents a JSON parsing error
+    #[error("JSON error: {0}")]
+    Json(#[from] serde_json::Error),
 }
 
 impl From<StdioError> for McpError {
@@ -42,24 +51,25 @@ impl From<StdioError> for McpError {
 ///     Ok(())
 /// }
 /// ```
+#[derive(Debug)]
 pub struct StdioTransport {
     /// Channel sender for broadcasting messages to all receivers
     tx: broadcast::Sender<Message>,
 }
 
 impl StdioTransport {
-    /// Creates a new StdioTransport instance with a broadcast channel for message distribution
-    /// 
-    /// # Returns
-    /// * `Result<Self, StdioError>` - A new StdioTransport instance or an error if creation fails
+    /// Creates a new StdioTransport instance
     pub fn new() -> Result<Self, StdioError> {
         let (tx, _) = broadcast::channel(100);
-        Ok(Self { tx })
+        let transport = Self { tx: tx.clone() };
+        
+        // Spawn a task to handle stdin
+        tokio::spawn(Self::handle_stdio(tx));
+        
+        Ok(transport)
     }
 
-    /// Handles reading from stdin and broadcasting messages to all receivers
-    /// 
-    /// This is an internal function that runs in a loop to process stdin input
+    /// Handles reading from stdin and broadcasting messages
     async fn handle_stdio(tx: broadcast::Sender<Message>) {
         let stdin = io::stdin();
         let mut reader = io::BufReader::new(stdin.lock());
@@ -67,25 +77,58 @@ impl StdioTransport {
 
         loop {
             line.clear();
-            if let Err(e) = reader.read_line(&mut line) {
-                error!("Failed to read from stdin: {}", e);
-                break;
-            }
-
-            if line.is_empty() {
-                break;
-            }
-
-            let request = Request::new(
-                "stdin".to_string(),
-                Some(Value::String(line.trim().to_string())),
-                RequestId::String("stdin".to_string())
-            );
-            if let Err(e) = tx.send(Message::Request(request)) {
-                error!("Failed to broadcast message: {}", e);
-                break;
+            match reader.read_line(&mut line) {
+                Ok(0) => break, // EOF
+                Ok(_) => {
+                    debug!("Received line: {}", line);
+                    match serde_json::from_str::<serde_json::Value>(&line) {
+                        Ok(value) => {
+                            if let Some(method) = value.get("method") {
+                                if method.as_str() == Some("initialize") {
+                                    INITIALIZED.store(true, Ordering::SeqCst);
+                                }
+                                
+                                // Check if this is a request or notification
+                                if value.get("id").is_some() {
+                                    // This is a request
+                                    if let Ok(request) = serde_json::from_value::<Request>(value.clone()) {
+                                        debug!("Broadcasting request: {:?}", request);
+                                        if let Err(e) = tx.send(Message::Request(request)) {
+                                            error!("Failed to broadcast request: {}", e);
+                                        }
+                                    }
+                                } else {
+                                    // This is a notification
+                                    if let Ok(notification) = serde_json::from_value::<Notification>(value) {
+                                        debug!("Broadcasting notification: {:?}", notification);
+                                        if let Err(e) = tx.send(Message::Notification(notification)) {
+                                            error!("Failed to broadcast notification: {}", e);
+                                        }
+                                    }
+                                }
+                            } else if value.get("result").is_some() || value.get("error").is_some() {
+                                // This is a response
+                                if let Ok(response) = serde_json::from_value::<Response>(value) {
+                                    debug!("Broadcasting response: {:?}", response);
+                                    if let Err(e) = tx.send(Message::Response(response)) {
+                                        error!("Failed to broadcast response: {}", e);
+                                    }
+                                }
+                            }
+                        }
+                        Err(e) => error!("Failed to parse JSON: {}", e),
+                    }
+                }
+                Err(e) => {
+                    error!("Failed to read from stdin: {}", e);
+                    break;
+                }
             }
         }
+    }
+
+    pub fn is_initialized() -> bool {
+        INITIALIZED.load(Ordering::SeqCst)
     }
 }
 
@@ -101,8 +144,16 @@ impl McpTransport for StdioTransport {
     async fn send(&self, message: Message) -> Result<(), McpError> {
         let stdout = io::stdout();
         let mut handle = stdout.lock();
-        writeln!(handle, "{:?}", message)
-            .map_err(|e| McpError::protocol(ErrorCode::ParseError, e.to_string()))?;
+        
+        let json = match &message {
+            Message::Request(req) => serde_json::to_string(&req)?,
+            Message::Response(resp) => serde_json::to_string(&resp)?,
+            Message::Notification(notif) => serde_json::to_string(&notif)?,
+        };
+        
+        debug!("Sending message: {}", json);
+        writeln!(handle, "{}", json)?;
+        handle.flush()?;
         Ok(())
     }
 
