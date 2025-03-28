@@ -1,9 +1,9 @@
-{ pkgs, buildInputs, ... }:
 {
+  pkgs,
+  buildInputs,
+  ...
+}: {
   # Wayland configuration
-  WLR_BACKENDS = "headless";
-  WLR_RENDERER = "pixman";
-  WLR_NO_HARDWARE_CURSORS = "1";
   WAYLAND_DISPLAY = "wayland-1";
   XDG_SESSION_TYPE = "wayland";
   XDG_RUNTIME_DIR = "/run/user/1000";
@@ -19,13 +19,5 @@
   PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig:${pkgs.wayland.dev}/lib/pkgconfig";
 
   # Font configuration
-  FONTCONFIG_PATH = "${pkgs.fontconfig.out}/etc/fonts";
-  FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
-  FONTCONFIG_SYSROOT = "${pkgs.fontconfig.out}";
   XDG_DATA_DIRS = "${pkgs.dejavu_fonts}/share:${pkgs.noto-fonts}/share:${pkgs.liberation_ttf}/share";
-
-  # Additional font paths
-  PANGOCAIRO_BACKEND = "fontconfig";
-  FREETYPE_PROPERTIES = "truetype:interpreter-version=35";
-  FONTCONFIG_DEBUG = "1";
 }

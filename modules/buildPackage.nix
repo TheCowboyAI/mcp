@@ -34,8 +34,8 @@ in
     '';
 
     meta = with pkgs.lib; {
-      description = ${pkg.package.description};
+      description = pkg.package.description;
       license = licenses.mit;
-      maintainers = with maintainers; ${pkg.package.authors};
+      maintainers = with maintainers; pkg.package.authors;
     };
   }

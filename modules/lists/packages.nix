@@ -1,14 +1,15 @@
-{ pkgs, ... }:
-with pkgs;
-[
+{
+  pkgs,
+  rustVersion ? pkgs.rust-bin.stable."1.85.1".default,
+  ...
+}:
+with pkgs; [
   just
   nix
   bash
   zsh
   starship
-  helix
   xdg-utils
-  socat
 
   # Nix
   nix-index
@@ -21,7 +22,7 @@ with pkgs;
   # it adds about 10 minutes to the build.
 
   # Rust
-  rust-bin.stable.latest.default
+  rustVersion
   bacon
   openssl.dev
   openssl.out
@@ -37,21 +38,4 @@ with pkgs;
   cargo-generate
   cargo-make
   cargo-edit
-
-  # wasm
-  wasmtime
-  wasmserve
-  wasm-tools
-  wasm-pack
-  alsa-lib
-  mesa
-  libdrm
-
-  wayland
-  wl-clipboard
-  spice-vdagent
-  wayland-proxy-virtwl
-  waypipe
-  sway
-  kitty
 ]

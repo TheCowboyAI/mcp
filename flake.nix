@@ -26,7 +26,7 @@
     env = import ./modules/sets/env.nix {inherit pkgs buildInputs;};
     buildInputs = import ./modules/lists/buildInputs.nix {inherit pkgs;};
     shellpackages = import ./modules/lists/packages.nix {inherit pkgs;};
-    devshell = import ./modules/devshell.nix {
+    devshell = import ./modules/shells/devshell.nix {
       inherit pkgs buildInputs env;
       packages = shellpackages;
     };
@@ -59,16 +59,15 @@
 
     devShells.${system}.default = devshell;
 
-    nixosConfigurations."${pkgName}c" = nixpkgs.lib.nixosSystem {
-      inherit system;
-      modules = [
-        configurationModule
-        users
-        {
-          environment.systemPackages = [self.packages.${system}.${pkgName}];
-          nixpkgs.overlays = [(import rust-overlay)];
-        }
-      ];
-    };
+    # nixosConfigurations."${pkgName}-container" = nixpkgs.lib.nixosSystem {
+    #   inherit system;
+    #   modules = [
+    #     configurationModule
+    #     {
+    #       environment.systemPackages = [self.packages.${system}.${pkgName}];
+    #       nixpkgs.overlays = [(import rust-overlay)];
+    #     }
+    #   ];
+    # };
   };
 }
