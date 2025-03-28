@@ -19,13 +19,18 @@
 
     buildInputs = with pkgs; [
       openssl
+      nix
+      graphviz
     ];
 
     # Add runtime dependencies
     propagatedBuildInputs = with pkgs; [
       nix
-      graphviz # For dot command in flake graph generation
+      graphviz
     ];
+
+    # Set environment variables for build
+    NIX_BIN_PATH = "${pkgs.nix}/bin/nix";
 
     meta = with pkgs.lib; {
       description = "A Model Context Protocol server for inspecting Nix systems and flakes";

@@ -71,10 +71,17 @@ pub struct SystemAnalyzer {
 
 impl SystemAnalyzer {
     pub fn new() -> Result<Self, SystemAnalyzerError> {
-        let nix_cmd = which::which("nix")
-            .map_err(SystemAnalyzerError::Which)?
-            .to_string_lossy()
-            .to_string();
+        Self::with_nix_path(None)
+    }
+
+    pub fn with_nix_path(nix_path: Option<String>) -> Result<Self, SystemAnalyzerError> {
+        let nix_cmd = match nix_path {
+            Some(path) => path,
+            None => which::which("nix")
+                .map_err(SystemAnalyzerError::Which)?
+                .to_string_lossy()
+                .to_string(),
+        };
 
         let version_output = Command::new(&nix_cmd)
             .arg("--version")
