@@ -1,9 +1,9 @@
-use mcp_rust_sdk::{Server, ServerBuilder};
-use tokio;
-use log::{info, error};
-
-mod inspector;
-use inspector::system::SystemAnalyzer;
+use std::sync::Arc;
+use env_logger;
+use log::info;
+use mcp_rust_sdk::server::{Server, ServerHandler};
+use mcp_rust_sdk::transport::Transport;
+use nix_inspector_mcp::{StdioTransport, inspector::system::SystemAnalyzer};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -13,21 +13,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create system analyzer
     let system_analyzer = SystemAnalyzer::new()?;
+    info!("System analyzer initialized");
 
-    // Create MCP server
-    let server = ServerBuilder::new()
-        .name("nix-inspector-mcp")
-        .version("0.1.0")
-        .add_provider("system", system_analyzer)
-        .build()?;
+    // Create stdio transport
+    let transport = StdioTransport::new()?;
+    info!("Using stdio transport");
 
-    info!("Server initialized, starting...");
-
-    // Start server
-    if let Err(e) = server.run().await {
-        error!("Server error: {}", e);
-        return Err(e.into());
-    }
+    // Create and start server
+    let server = Server::new(
+        Arc::new(transport) as Arc<dyn Transport>,
+        Arc::new(system_analyzer) as Arc<dyn ServerHandler>
+    );
+    info!("Server starting...");
+    server.start().await?;
 
     Ok(())
 } 

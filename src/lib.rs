@@ -1,6 +1,8 @@
 pub mod inspector;
+pub mod transport;
 
-pub use inspector::system::SystemAnalyzer;
+pub use inspector::*;
+pub use transport::*;
 
-/// Re-export common types used in the public API
-pub use mcp_rust_sdk::{Server, ServerBuilder}; 
+// Re-export only the Server trait since that's what we implement
+pub use mcp_rust_sdk::server::Server; 
