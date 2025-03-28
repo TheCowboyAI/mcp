@@ -26,6 +26,9 @@ Phase: Initial Development
    - [ ] Protocol implementation
    - [ ] Integration with nil
    - [ ] Integration with nix-direnv
+   - [ ] Nix development environment setup
+     - [ ] flake.nix with build and run support
+     - [ ] Rust development shell configuration
 
 2. Documentation
    - [x] Project memory structure
@@ -61,6 +64,9 @@ Phase: Initial Development
    - [ ] Complete nix-topology integration
    - [ ] Add nil language server support
    - [ ] Implement comprehensive flake analysis
+   - [ ] Set up Nix development environment
+     - [ ] Create and test flake.nix
+     - [ ] Configure Rust development shell
 
 2. Documentation (Target: Week 2)
    - [ ] Complete API documentation
@@ -76,6 +82,7 @@ Phase: Initial Development
    - [ ] Flake inspection testing
 
 ## Recent Updates
+- Added requirement for Nix development environment with Rust support
 - Added nix-inspector-mcp server implementation
 - Implemented basic system analysis features
 - Added development flake inspection
