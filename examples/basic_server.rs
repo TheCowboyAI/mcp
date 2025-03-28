@@ -1,4 +1,4 @@
-use nix_inspector_mcp::{Server, ServerBuilder, SystemAnalyzer};
+use nix_inspector_mcp::{ServerBuilder, SystemAnalyzer};
 use log::info;
 
 #[tokio::main]
@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_provider("system", system_analyzer)
         .build()?;
         
-    info!("Server starting on default port...");
+    info!("Server starting...");
     server.run().await?;
     
     Ok(())
