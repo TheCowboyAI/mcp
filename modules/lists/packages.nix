@@ -1,16 +1,25 @@
 # Package definitions for nix-inspector-mcp
-{
-  pkgs,
-  naersk-lib,
-  ...
-}: {
-  default = naersk-lib.buildPackage {
+{pkgs, ...}: let
+  rustPlatform = pkgs.makeRustPlatform {
+    cargo = pkgs.rust-bin.stable."1.85.1".default;
+    rustc = pkgs.rust-bin.stable."1.85.1".default;
+  };
+in {
+  default = rustPlatform.buildRustPackage {
     pname = "nix-inspector-mcp";
     version = "0.1.0";
-    root = ../../.;
+    src = ../../.;
+
+    cargoLock = {
+      lockFile = ../../Cargo.lock;
+      outputHashes = {
+        # Add dependency hashes here if needed
+      };
+    };
 
     nativeBuildInputs = with pkgs; [
       pkg-config
+      rustPlatform.cargoSetupHook
     ];
 
     buildInputs = with pkgs; [

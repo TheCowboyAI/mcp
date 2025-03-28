@@ -6,9 +6,9 @@
     # Pinned to 24.11 for stability
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
 
-    # Rust build support
-    naersk = {
-      url = "github:nix-community/naersk";
+    # Rust overlay for better Rust toolchain management
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -16,7 +16,7 @@
   outputs = {
     self,
     nixpkgs,
-    naersk,
+    rust-overlay,
   }: let
     # Systems supported by this flake
     systems = [
@@ -35,10 +35,12 @@
     # Binary packages for each supported system
     packages = forAllSystems (
       system: let
-        pkgs = import nixpkgs {inherit system;};
-        naersk-lib = naersk.lib.${system};
+        overlays = [(import rust-overlay)];
+        pkgs = import nixpkgs {
+          inherit system overlays;
+        };
       in
-        packages {inherit pkgs naersk-lib;}
+        packages {inherit pkgs;}
     );
 
     # Apps provide a way to run the package

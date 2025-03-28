@@ -1,8 +1,12 @@
 [toolchain]
 channel = "1.85.1"
 components = [
+    "cargo",
+    "rustc",
+    "rust-std",
+    "rust-docs",
     "rustfmt",
     "clippy",
-    "rust-src"
+    "rust-src",
 ]
 targets = ["x86_64-unknown-linux-gnu"] 
