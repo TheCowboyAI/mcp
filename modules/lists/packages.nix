@@ -1,11 +1,6 @@
 # Package definitions for nix-inspector-mcp
-{pkgs, ...}: let
-  rustPlatform = pkgs.makeRustPlatform {
-    cargo = pkgs.rust-bin.stable."1.85.1".default;
-    rustc = pkgs.rust-bin.stable."1.85.1".default;
-  };
-in {
-  default = rustPlatform.buildRustPackage {
+{pkgs, ...}: {
+  default = pkgs.rustPlatform.buildRustPackage {
     pname = "nix-inspector-mcp";
     version = "0.1.0";
     src = ../../.;
