@@ -26,16 +26,37 @@
    - Rust toolchain
 
 2. Environment Setup
+   The project uses a standardized Nix configuration following the Cowboy AI Standard:
+
    ```nix
-   # development.nix
+   # flake.nix structure
    {
      inputs = {
        nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-       flake-utils.url = "github:numtide/flake-utils";
+       rust-overlay.url = "github:oxalica/rust-overlay";
      };
-     # ... development environment configuration
+
+     outputs = { self, nixpkgs, rust-overlay, ... }: {
+       # Modular configuration using /modules structure
+       # - /modules/shells/ for shell configurations
+       # - /modules/lists/ for package lists
+       # - /modules/sets/ for attribute sets
+     };
    }
    ```
+
+3. Module Structure
+   - `buildPackage.nix`: Centralized build configuration
+   - `configuration.nix`: System configuration
+   - `shells/devshell.nix`: Development environment
+   - `lists/`: Package and build input definitions
+   - `sets/`: Environment and option configurations
+
+4. Development Shell Features
+   - Rust 1.85.1 stable toolchain
+   - Automated environment setup
+   - Project-specific dependencies
+   - Development tools and utilities
 
 ## Technical Constraints
 1. System Requirements
